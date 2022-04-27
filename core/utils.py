@@ -7,6 +7,8 @@ from distutils.util import strtobool as _stb  # pylint: disable=import-error
 from itertools import takewhile, zip_longest
 from urllib import parse
 
+
+
 import discord
 from discord.ext import commands
 
@@ -134,7 +136,8 @@ def is_image_url(url: str, **kwargs) -> str:
     bool
         Whether the URL is a valid image URL.
     """
-    if url.startswith("https://gyazo.com") or url.startswith("http://gyazo.com"):
+    if url.startswith("https://gyazo.com") or url.startswith("http://gyazo.com") or url.startswith("https://tenor.com") or \
+            url.startswith("http://tenor.com") or url.startswith("http://tenor.co"):
         # gyazo support
         url = re.sub(
             r"(http[s]?:\/\/)((?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)",
@@ -159,7 +162,7 @@ def parse_image_url(url: str, *, convert_size=True) -> str:
     str
         The converted URL, or '' if the URL isn't in the proper format.
     """
-    types = [".png", ".jpg", ".gif", ".jpeg", ".webp"]
+    types = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".gifv"]
     url = parse.urlsplit(url)
 
     if any(url.path.lower().endswith(i) for i in types):
