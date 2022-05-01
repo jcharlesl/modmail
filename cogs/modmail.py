@@ -1,6 +1,6 @@
 import asyncio
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from itertools import zip_longest
 from typing import Optional, Union
 from types import SimpleNamespace
@@ -1470,9 +1470,10 @@ class Modmail(commands.Cog):
         users = []
         now = ctx.message.created_at
         print("Now Date Object:")
-        print(type(now))
         print(now)
         print(now.tzname())
+        print("After adding UTC timezone:")
+        print(now.replace(tzinfo=timezone.utc).tzname())
 
         blocked_users = list(self.bot.blocked_users.items())
         for id_, reason in blocked_users:
@@ -1489,10 +1490,15 @@ class Modmail(commands.Cog):
                     )
 
             if end_time is not None:
-                print("datatime.fromisoformat: ")
+                print("datetime.fromisoformat: ")
                 print(datetime.fromisoformat(end_time.group(1)))
                 print(datetime.fromisoformat(end_time.group(1)).tzname())
-                after = (datetime.fromisoformat(end_time.group(1)) - now).total_seconds()
+                print("After adding UTC TZ:")
+                print(datetime.fromisoformat(end_time.group(1)).replace(tzinfo=timezone.utc).tzname())
+                after = (datetime.fromisoformat(end_time.group(1)).replace(tzinfo=timezone.utc) -
+                         now.replace(tzinfo=timezone.utc)).total_seconds()
+                print("after datetime info: seconds remaining in ban")
+                print(after)
                 if after <= 0:
                     # No longer blocked
                     self.bot.blocked_users.pop(str(id_))
