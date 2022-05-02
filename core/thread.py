@@ -663,13 +663,20 @@ class Thread:
         embed1.description = message
 
         tasks = [self.bot.api.edit_message(message1.id, message), message1.edit(embed=embed1)]
-        if message2 is not [None]:
-            for m2 in message2:
-                embed2 = m2.embeds[0]
-                embed2.description = message
-                tasks += [m2.edit(embed=embed2)]
-        elif message1.embeds[0].author.name.startswith("Persistent Note"):
+        # need to check for note first.
+        print(message1.embeds[0].author.name)
+        if message1.embeds[0].author.name.startswith("Persistent Note"):
+            print("This is a note!:")
             tasks += [self.bot.api.edit_note(message1.id, message)]
+        else:
+            for m2 in message2:
+                print("Message:")
+                print(type(m2))
+                print(m2)
+                if m2 is not None:
+                    embed2 = m2.embeds[0]
+                    embed2.description = message
+                    tasks += [m2.edit(embed=embed2)]
 
         await asyncio.gather(*tasks)
 
