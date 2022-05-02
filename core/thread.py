@@ -1103,7 +1103,7 @@ class Thread:
                 plain_message += f"{embed.author.name}:** {embed.description}"
                 files = []
                     
-                    for i in message.attachmenrs:
+                    for i in message.attachments:
                         files.append(await i.to_file())
 
                 msg = await destination.send(plain_message, files=files)
