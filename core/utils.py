@@ -9,6 +9,7 @@ from urllib import parse
 
 
 
+
 import discord
 from discord.ext import commands
 
@@ -162,9 +163,8 @@ def parse_image_url(url: str, *, convert_size=True) -> str:
     str
         The converted URL, or '' if the URL isn't in the proper format.
     """
-    types = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".gifv", ".dds"]
+    types = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".gifv", ".dds", ".apng", ".lottie"]
     url = parse.urlsplit(url)
-
     if any(url.path.lower().endswith(i) for i in types):
         if convert_size:
             return parse.urlunsplit((*url[:3], "size=128", url[-1]))
