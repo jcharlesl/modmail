@@ -77,8 +77,7 @@ class Modmail(commands.Cog):
                     logger.info("Granting %s access to Modmail category.", key.name)
                     overwrites[key] = discord.PermissionOverwrite(read_messages=True)
 
-        category = await self.bot.modmail_guild.create_category(name="Modmail", overwrites=overwrites)
-
+        category = await self.bot.modmail_guild.create_category(name="CapMail", overwrites=overwrites)
         await category.edit(position=0)
 
         log_channel = await self.bot.modmail_guild.create_text_channel(name="bot-logs", category=category)
@@ -86,16 +85,16 @@ class Modmail(commands.Cog):
         embed = discord.Embed(
             title="Friendly Reminder",
             description=f"You may use the `{self.bot.prefix}config set log_channel_id "
-            "<channel-id>` command to set up a custom log channel, then you can delete this default "
-            f"{log_channel.mention} log channel.",
+                        "<channel-id>` command to set up a custom log channel, then you can delete this default "
+                        f"{log_channel.mention} log channel.",
             color=self.bot.main_color,
         )
 
         embed.add_field(
             name="Thanks for using our bot!",
             value="If you like what you see, consider giving the "
-            "[repo a star](https://github.com/kyb3r/modmail) :star: and if you are "
-            "feeling extra generous, buy us coffee on [Patreon](https://patreon.com/kyber) :heart:!",
+                  "[repo a star](https://github.com/kyb3r/modmail) :star: and if you are "
+                  "feeling extra generous, buy us coffee on [Patreon](https://patreon.com/kyber) :heart:!",
         )
 
         embed.set_footer(text=f'Type "{self.bot.prefix}help" for a complete list of commands.')
@@ -1331,12 +1330,12 @@ class Modmail(commands.Cog):
     @commands.command(usage="<user> [category] [options]")
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     async def contact(
-        self,
-        ctx,
-        users: commands.Greedy[Union[discord.Member, discord.User, discord.Role]],
-        *,
-        category: Union[SimilarCategoryConverter, str] = None,
-        manual_trigger=True,
+            self,
+            ctx,
+            users: commands.Greedy[Union[discord.Member, discord.User, discord.Role]],
+            *,
+            category: Union[SimilarCategoryConverter, str] = None,
+            manual_trigger=True,
     ):
         """
         Create a thread with a specified member.
@@ -1351,19 +1350,33 @@ class Modmail(commands.Cog):
         """
         silent = False
         if isinstance(category, str):
-            if "silent" in category or "silently" in category:
+
+            category = category.split()
+
+            if category[-1].lower() in ("silent", "silently"):
                 silent = True
-                category = category.strip("silently").strip("silent").strip()
+
+                category.pop()
+
+            category = "SilentChat"
+            category = " ".join(category)
+
+            overwrites = {
+                self.bot.modmail_guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                self.bot.modmail_guild.me: discord.PermissionOverwrite(read_messages=True),
+                # allows for full private channel between the admins and users by overwriting permissions.
+            }
+
+            if category:
                 try:
-                    category = await SimilarCategoryConverter().convert(
-                        ctx, category
-                    )  # attempt to find a category again
+                    category = await self.bot.modmail_guild.create_category \
+                        (name="SilentChat", overwrites=overwrites)
+
+                    # create a category for anyone who is contacted silently
                 except commands.BadArgument:
                     category = None
-
             if isinstance(category, str):
                 category = None
-
         errors = []
         for u in list(users):
             if isinstance(u, discord.Role):
@@ -1611,7 +1624,7 @@ class Modmail(commands.Cog):
             embed = discord.Embed(
                 title="Success",
                 description=f"{mention} was previously blocked internally for "
-                f'"{reason}". {mention} is now whitelisted.',
+                            f'"{reason}". {mention} is now whitelisted.',
                 color=self.bot.main_color,
             )
         else:
@@ -1627,11 +1640,11 @@ class Modmail(commands.Cog):
     @checks.has_permissions(PermissionLevel.MODERATOR)
     @trigger_typing
     async def block(
-        self,
-        ctx,
-        user_or_role: Optional[Union[User, discord.Role]] = None,
-        *,
-        after: UserFriendlyTime = None,
+            self,
+            ctx,
+            user_or_role: Optional[Union[User, discord.Role]] = None,
+            *,
+            after: UserFriendlyTime = None,
     ):
         """
         Block a user or role from using Modmail.
@@ -1656,8 +1669,8 @@ class Modmail(commands.Cog):
         mention = getattr(user_or_role, "mention", f"`{user_or_role.id}`")
 
         if (
-            not isinstance(user_or_role, discord.Role)
-            and str(user_or_role.id) in self.bot.blocked_whitelisted_users
+                not isinstance(user_or_role, discord.Role)
+                and str(user_or_role.id) in self.bot.blocked_whitelisted_users
         ):
             embed = discord.Embed(
                 title="Error",
@@ -1691,7 +1704,7 @@ class Modmail(commands.Cog):
             embed = discord.Embed(
                 title="Success",
                 description=f"{mention} was previously blocked {old_reason}.\n"
-                f"{mention} is now blocked {reason}",
+                            f"{mention} is now blocked {reason}",
                 color=self.bot.main_color,
             )
         else:
@@ -1742,13 +1755,13 @@ class Modmail(commands.Cog):
                 embed = discord.Embed(
                     title="Success",
                     description=f"{mention} was previously blocked internally {reason}.\n"
-                    f"{mention} is no longer blocked.",
+                                f"{mention} is no longer blocked.",
                     color=self.bot.main_color,
                 )
                 embed.set_footer(
                     text="However, if the original system block reason still applies, "
-                    f"{name} will be automatically blocked again. "
-                    f'Use "{self.bot.prefix}blocked whitelist {user_or_role.id}" to whitelist the user.'
+                         f"{name} will be automatically blocked again. "
+                         f'Use "{self.bot.prefix}blocked whitelist {user_or_role.id}" to whitelist the user.'
                 )
             else:
                 embed = discord.Embed(
@@ -1831,11 +1844,11 @@ class Modmail(commands.Cog):
         # find genesis message to retrieve User ID
         async for message in ctx.channel.history(limit=10, oldest_first=True):
             if (
-                message.author == self.bot.user
-                and message.embeds
-                and message.embeds[0].color
-                and message.embeds[0].color.value == self.bot.main_color
-                and message.embeds[0].footer.text
+                    message.author == self.bot.user
+                    and message.embeds
+                    and message.embeds[0].color
+                    and message.embeds[0].color.value == self.bot.main_color
+                    and message.embeds[0].footer.text
             ):
                 user_id = match_user_id(message.embeds[0].footer.text)
                 other_recipients = match_other_recipients(ctx.channel.topic)
@@ -1880,7 +1893,7 @@ class Modmail(commands.Cog):
                         embed = discord.Embed(
                             title="Delete Channel",
                             description="This thread channel is no longer in use. "
-                            f"All messages will be directed to {ctx.channel.mention} instead.",
+                                        f"All messages will be directed to {ctx.channel.mention} instead.",
                             color=self.bot.error_color,
                         )
                         embed.set_footer(
