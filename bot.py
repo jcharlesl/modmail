@@ -1115,6 +1115,9 @@ class ModmailBot(commands.Bot):
         await self.config.update()
 
     async def on_message(self, message):
+        print(f"{message =}")
+        print(f"{message.content =}")
+        print(f"{message.attachments =}")
         await self.wait_for_connected()
         if message.type == discord.MessageType.pins_add and message.author == self.user:
             await message.delete()
