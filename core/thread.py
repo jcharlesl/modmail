@@ -1,6 +1,5 @@
 import asyncio
 import copy
-import io
 import re
 import time
 import typing
@@ -849,10 +848,10 @@ class Thread:
                     "more information"
                 )
           
-             msg = await message.channel.send( 
-                 embed= discord.Embed(
-                     color= self.bot.error_color,
-                     description = description,
+            msg = await message.channel.send(
+                embed=discord.Embed(
+                    color=self.bot.error_color,
+                    description=description,
                 )
             )
         else:
@@ -884,7 +883,7 @@ class Thread:
 
         await asyncio.gather(*tasks)
         self.bot.dispatch("thread_reply", self, True, message, anonymous, plain)
-        return (user_msg, msg)  # sent_to_user, sent_to_thread_channel
+        return user_msg, msg  # sent_to_user, sent_to_thread_channel
 
     async def send(
         self,
@@ -1092,9 +1091,9 @@ class Thread:
         if plain:
             if from_mod and not isinstance(destination, discord.TextChannel):
                 # Plain to user
-                with warning.catch_warning():
-                    warning.simplefilter("ignore")
-                    additional_images= []
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    additional_images = []
                     
                 if embed.footer.text:
                     plain_message = f"**({embed.footer.text}) "
@@ -1103,8 +1102,8 @@ class Thread:
                 plain_message += f"{embed.author.name}:** {embed.description}"
                 files = []
                     
-                    for i in message.attachments:
-                        files.append(await i.to_file())
+                for i in message.attachments:
+                    files.append(await i.to_file())
 
                 msg = await destination.send(plain_message, files=files)
             else:
